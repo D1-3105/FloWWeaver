@@ -1,7 +1,5 @@
 package video_streaming
 
-import "log"
-
 func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 	streamer := ctx.GetStreamer()
 
@@ -19,8 +17,6 @@ func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 		if err != nil || frame.Empty() {
 			continue
 		}
-		log.Println("New frame")
-
 		go hlsHandler.HandleFrame(ctx.Context, frame)
 	}
 }

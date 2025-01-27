@@ -20,7 +20,19 @@ func main() {
 		video_streaming.ListenStreamToHLS(ctx, "webcam")
 	} else {
 		go video_streaming.ListenStreamToHLS(ctx, "webcam")
-		http.Handle("/hls/", http.StripPrefix("/hls/", http.FileServer(http.Dir("./stream_repo/webcam/"))))
+
+		http.HandleFunc("/hls/", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+			if r.Method == http.MethodOptions {
+				return
+			}
+
+			http.StripPrefix("/hls/", http.FileServer(http.Dir("./stream_repo/"))).ServeHTTP(w, r)
+		})
+
 		err := http.ListenAndServe(":8080", nil)
 		if errors.Is(err, http.ErrServerClosed) {
 			fmt.Printf("server closed\n")

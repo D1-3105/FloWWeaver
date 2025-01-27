@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Video Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+<video id="video" controls></video>
+
+<script>
+    // Проверка поддержки HLS в браузере
+    if (Hls.isSupported()) {
+        var video = document.getElementById('video');
+        var hls = new Hls();
+
+        // Загружаем поток HLS
+        hls.loadSource('http://localhost:8080/hls/webcam/index.m3u8');
+        hls.attachMedia(video);
+
+        // В случае ошибки при загрузке потока
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            console.error('Error loading HLS stream', data);
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Для Safari (где HLS поддерживается нативно)
+        var video = document.getElementById('video');
+        video.src = 'http://localhost:8080/hls/webcam/index.m3u8';
+    } else {
+        console.error('HLS is not supported in this browser');
+    }
+</script>
+</body>
+</html>
