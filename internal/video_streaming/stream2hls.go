@@ -16,10 +16,11 @@ func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 
 	for {
 		frame, err := streamer.GetFrame()
-		log.Println("New frame")
-		if err != nil {
+		if err != nil || frame.Empty() {
 			continue
 		}
-		hlsHandler.HandleFrame(ctx.Context, frame)
+		log.Println("New frame")
+
+		go hlsHandler.HandleFrame(ctx.Context, frame)
 	}
 }

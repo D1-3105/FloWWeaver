@@ -14,6 +14,12 @@ type CaptureContext struct {
 	streamerInitialized chan bool
 }
 
+type CaptureParams struct {
+	FPS    float64
+	Width  int
+	Height int
+}
+
 func LaunchStreamDaemon(ctx *CaptureContext) {
 
 	for {
@@ -28,8 +34,11 @@ func LaunchStreamDaemon(ctx *CaptureContext) {
 	}
 }
 
-func NewCaptureContext(streamId interface{}) *CaptureContext {
+func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureContext {
 	capture, err := gocv.OpenVideoCapture(streamId)
+	capture.Set(gocv.VideoCaptureFPS, settings.FPS)
+	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
+	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
 	if err != nil {
 		log.Fatal(err)
 		return nil
