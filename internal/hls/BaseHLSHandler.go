@@ -1,4 +1,4 @@
-package video_streaming
+package hls
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 )
 
 type BaseHLSHandler struct {
-	config           *HLSConfig
-	streamDirManager HLSRepoManager
+	config           *Config
+	streamDirManager RepoManager
 	frameQ           *[]gocv.Mat
 	frameCnt         int
 	mutex            sync.Mutex
@@ -36,7 +36,7 @@ func (h *BaseHLSHandler) HandleFrame(ctx context.Context, frame gocv.Mat) {
 	}
 }
 
-func NewBaseHLSHandler(manager HLSRepoManager) HLS {
+func NewBaseHLSHandler(manager RepoManager) HLS {
 	data := make([]gocv.Mat, manager.GetConfig().frameNumPerShard)
 	return &BaseHLSHandler{
 		config:           manager.GetConfig(),

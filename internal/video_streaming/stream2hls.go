@@ -1,14 +1,18 @@
 package video_streaming
 
+import (
+	"go_video_streamer/internal/hls"
+)
+
 func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 	streamer := ctx.GetStreamer()
 
-	hlsHandler := NewBaseHLSHandler(NewHLSDirManager(
-		NewHLSConfig(
+	hlsHandler := hls.NewBaseHLSHandler(hls.NewHLSDirManager(
+		hls.NewHLSConfig(
 			"stream_repo"+"/"+streamName,
 			"index.m3u8",
 			5,
-			ctx.streamer.GetVideoFPS(),
+			ctx.Streamer.GetVideoFPS(),
 		)),
 	)
 

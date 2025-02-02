@@ -1,4 +1,4 @@
-package video_streaming
+package hls
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ import (
 )
 
 type HLSDirManager struct {
-	config       *HLSConfig
+	config       *Config
 	shardCounter int
 
 	m3u8Desc  *os.File
@@ -21,11 +21,11 @@ type HLSDirManager struct {
 	shardLock sync.Mutex
 }
 
-func (manager *HLSDirManager) GetConfig() *HLSConfig {
+func (manager *HLSDirManager) GetConfig() *Config {
 	return manager.config
 }
 
-func NewHLSDirManager(config *HLSConfig) *HLSDirManager {
+func NewHLSDirManager(config *Config) *HLSDirManager {
 	// Создайте каталог для HLS
 	_ = os.MkdirAll(config.dir, os.ModePerm)
 

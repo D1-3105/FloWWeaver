@@ -3,6 +3,7 @@ package video_streaming
 import (
 	"context"
 	"errors"
+	"go_video_streamer/internal/opencv_global_capture"
 	"gocv.io/x/gocv"
 	"log"
 )
@@ -10,7 +11,7 @@ import (
 type CaptureContext struct {
 	context.Context
 
-	streamer            CaptureStreamer
+	Streamer            CaptureStreamer
 	streamerInitialized chan bool
 }
 
@@ -25,9 +26,9 @@ func LaunchStreamDaemon(ctx *CaptureContext) {
 	for {
 		select {
 		case <-ctx.Done():
-			err := ctx.streamer.capture.Close()
+			err := (*ctx.Streamer.capture).Close()
 			if err != nil {
-				log.Printf("Error closing capture streamer: %v", err)
+				log.Printf("Error closing capture Streamer: %v", err)
 			}
 			return
 		}
@@ -35,7 +36,7 @@ func LaunchStreamDaemon(ctx *CaptureContext) {
 }
 
 func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureContext {
-	capture, err := gocv.OpenVideoCapture(streamId)
+	capture, err := opencv_global_capture.NewVideoCapture(streamId)
 	capture.Set(gocv.VideoCaptureFPS, settings.FPS)
 	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
 	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
@@ -44,7 +45,7 @@ func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureCon
 		return nil
 	}
 	ctx := CaptureContext{
-		streamer:            NewCaptureStreamer(*capture),
+		Streamer:            NewCaptureStreamer(&capture),
 		Context:             context.Background(),
 		streamerInitialized: make(chan bool),
 	}
@@ -70,5 +71,5 @@ func (ctx *CaptureContext) Err() error {
 }
 
 func (ctx *CaptureContext) GetStreamer() *CaptureStreamer {
-	return &ctx.streamer
+	return &ctx.Streamer
 }

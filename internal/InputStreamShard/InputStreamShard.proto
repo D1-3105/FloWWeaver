@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package InputStreamShard;
+
+option optimize_for = LITE_RUNTIME;
+option go_package = "./;InputStreamShard";
+
+message StreamShard {
+  bytes image_data=1;
+  uint32 width = 2;
+  uint32 height = 3;
+  float fps = 4;
+  bool gzipped = 5;
+  uint32 matType = 6;
+}

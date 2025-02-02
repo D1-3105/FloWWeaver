@@ -2,6 +2,7 @@ package video_streaming
 
 import (
 	"errors"
+	"go_video_streamer/internal/opencv_global_capture"
 	"gocv.io/x/gocv"
 	"sync"
 )
@@ -15,11 +16,11 @@ func (e CaptureError) Error() string {
 }
 
 type CaptureStreamer struct {
-	capture      gocv.VideoCapture
+	capture      *opencv_global_capture.VideoCapture
 	captureMutex sync.RWMutex
 }
 
-func NewCaptureStreamer(capture gocv.VideoCapture) CaptureStreamer {
+func NewCaptureStreamer(capture *opencv_global_capture.VideoCapture) CaptureStreamer {
 	return CaptureStreamer{capture: capture}
 }
 
@@ -28,7 +29,7 @@ func (streamer *CaptureStreamer) GetFrame() (gocv.Mat, error) {
 	defer streamer.captureMutex.RUnlock()
 
 	img := gocv.NewMat()
-	err := !streamer.capture.Read(&img)
+	err := !(*streamer.capture).Read(&img)
 	if err {
 		return img, CaptureError{Err: errors.New("failed to read frame")}
 	}
@@ -36,5 +37,5 @@ func (streamer *CaptureStreamer) GetFrame() (gocv.Mat, error) {
 }
 
 func (streamer *CaptureStreamer) GetVideoFPS() float64 {
-	return streamer.capture.Get(gocv.VideoCaptureFPS)
+	return (*streamer.capture).Get(gocv.VideoCaptureFPS)
 }
