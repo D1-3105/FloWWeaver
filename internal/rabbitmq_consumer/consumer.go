@@ -22,7 +22,7 @@ func NewRMQVideoConsumer(config *Config) *RMQVideoConsumer {
 	}
 	env := config.ToStreamEnv()
 	return &RMQVideoConsumer{
-		reportChan: make(chan *InputStreamShard2.StreamShard),
+		reportChan: make(chan *InputStreamShard2.StreamShard, 50),
 		config:     config,
 		stopChan:   make(chan bool),
 		env:        env,
@@ -43,10 +43,7 @@ func (consumer *RMQVideoConsumer) Start() {
 
 			log.Println("Message unmarshalled successfully")
 			consumer.reportChan <- &streamShard
-			err = consumerContext.Consumer.StoreOffset()
-			if err != nil {
-				panic(err)
-			}
+
 		}
 
 		rawConsumer, err := consumer.env.NewConsumer(

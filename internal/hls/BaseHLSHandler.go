@@ -2,8 +2,10 @@ package hls
 
 import (
 	"context"
+	"fmt"
 	"gocv.io/x/gocv"
 	"log"
+	"log/slog"
 	"sync"
 )
 
@@ -20,7 +22,7 @@ func (h *BaseHLSHandler) HandleFrame(ctx context.Context, frame gocv.Mat) {
 	defer h.mutex.Unlock()
 	(*h.frameQ)[h.frameCnt] = frame
 	h.frameCnt++
-
+	slog.Debug(fmt.Sprintf("Frame: %d of %d", h.frameCnt, h.config.frameNumPerShard))
 	if h.frameCnt == h.config.frameNumPerShard {
 		currentBatch := *h.frameQ
 		go func() {

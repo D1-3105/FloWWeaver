@@ -2,6 +2,7 @@ package video_streaming
 
 import (
 	"go_video_streamer/internal/hls"
+	"log"
 )
 
 func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
@@ -19,6 +20,7 @@ func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 	for {
 		frame, err := streamer.GetFrame()
 		if err != nil || frame.Empty() {
+			log.Println("Get frame error", err)
 			continue
 		}
 		go hlsHandler.HandleFrame(ctx.Context, frame)
