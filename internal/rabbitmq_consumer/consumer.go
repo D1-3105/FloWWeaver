@@ -43,6 +43,10 @@ func (consumer *RMQVideoConsumer) Start() {
 
 			log.Println("Message unmarshalled successfully")
 			consumer.reportChan <- &streamShard
+			err = consumerContext.Consumer.StoreOffset()
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		rawConsumer, err := consumer.env.NewConsumer(
