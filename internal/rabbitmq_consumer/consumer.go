@@ -2,11 +2,12 @@ package rabbitmq_consumer
 
 import (
 	"context"
+	"fmt"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 	InputStreamShard2 "go_video_streamer/internal/InputStreamShard"
 	"google.golang.org/protobuf/proto"
-	"log"
+	"log/slog"
 )
 
 type RMQVideoConsumer struct {
@@ -37,11 +38,11 @@ func (consumer *RMQVideoConsumer) Start() {
 			var streamShard InputStreamShard2.StreamShard
 			err := proto.Unmarshal(message.GetData(), &streamShard)
 			if err != nil {
-				log.Printf("Error unmarshalling input stream shard data: %v", err)
+				slog.Error(fmt.Sprintf("Error unmarshalling input stream shard data: %v", err))
 				return
 			}
 
-			log.Println("Message unmarshalled successfully")
+			slog.Debug("Message unmarshalled successfully")
 			consumer.reportChan <- &streamShard
 
 		}
@@ -50,21 +51,21 @@ func (consumer *RMQVideoConsumer) Start() {
 			consumer.config.Queue, handler, consumer.config.ConsumerArgs,
 		)
 		if err != nil {
-			log.Printf("Error creating consumer: %v", err)
+			slog.Error(fmt.Sprintf("Error creating consumer: %v", err))
 			consumer.stopChan <- true
 			return
 		}
 
 		defer func() {
 			_ = rawConsumer.Close()
-			log.Println("Consumer closed")
+			slog.Info("Consumer closed")
 		}()
 		<-consumerContext.Done()
-		log.Println("Consumer goroutine exiting")
+		slog.Info("Consumer goroutine exiting")
 	}()
 
 	<-consumer.stopChan
-	log.Println("Stopping RMQ Video Consumer")
+	slog.Info("Stopping RMQ Video Consumer")
 	cancel()
 }
 

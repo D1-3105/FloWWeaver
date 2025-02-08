@@ -7,6 +7,7 @@ import (
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 	"go_video_streamer/internal/rabbitmq_consumer"
 	"go_video_streamer/internal/video_streaming"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -56,9 +57,9 @@ func main() {
 
 		err := http.ListenAndServe(":8080", nil)
 		if errors.Is(err, http.ErrServerClosed) {
-			fmt.Printf("server closed\n")
+			slog.Info("server closed\n")
 		} else if err != nil {
-			fmt.Printf("error starting server: %s\n", err)
+			slog.Error(fmt.Sprintf("error starting server: %s\n", err))
 			os.Exit(1)
 		}
 	}

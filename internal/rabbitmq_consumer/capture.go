@@ -3,10 +3,11 @@ package rabbitmq_consumer
 import (
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	InputStreamShard2 "go_video_streamer/internal/InputStreamShard"
 	"gocv.io/x/gocv"
 	"io"
-	"log"
+	"log/slog"
 )
 
 type RabbitMQCapture struct {
@@ -52,7 +53,7 @@ func (rc *RabbitMQCapture) Read(mat *gocv.Mat) bool {
 	} else {
 		reader, err := gzip.NewReader(bytes.NewReader(matData.ImageData))
 		if err != nil {
-			log.Printf("Error creating gzip reader: %v", err)
+			slog.Error(fmt.Sprintf("Error creating gzip reader: %v", err))
 			return false
 		}
 		defer func(reader *gzip.Reader) {
@@ -61,7 +62,7 @@ func (rc *RabbitMQCapture) Read(mat *gocv.Mat) bool {
 
 		decompressedData, err := io.ReadAll(reader)
 		if err != nil {
-			log.Printf("Error decompressing image data: %v", err)
+			slog.Error(fmt.Sprintf("Error decompressing image data: %v", err))
 			return false
 		}
 
@@ -74,12 +75,12 @@ func (rc *RabbitMQCapture) Read(mat *gocv.Mat) bool {
 	}
 
 	if err != nil {
-		log.Printf("Error creating Mat from bytes: %v", err)
+		slog.Error(fmt.Sprintf("Error creating Mat from bytes: %v", err))
 		return false
 	}
 
 	*mat = newMat
-	log.Println("Mat read")
+	slog.Debug("Mat read")
 	return true
 }
 

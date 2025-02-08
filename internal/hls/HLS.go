@@ -2,8 +2,9 @@ package hls
 
 import (
 	"context"
+	"fmt"
 	"gocv.io/x/gocv"
-	"log"
+	"log/slog"
 )
 
 type HLS interface {
@@ -24,7 +25,7 @@ type RepoManager interface {
 }
 
 func NewHLSConfig(dir, m3u8Name string, shardDur float64, fps float64) *Config {
-	log.Printf(`New HLSConfig: dir=%s, m3u8=%s, shard=%fs, FPS=%f`, dir, m3u8Name, shardDur, fps)
+	slog.Info(fmt.Sprintf(`New HLSConfig: dir=%s, m3u8=%s, shard=%fs, FPS=%f`, dir, m3u8Name, shardDur, fps))
 	return &Config{
 		dir:              dir,
 		m3u8Name:         m3u8Name,

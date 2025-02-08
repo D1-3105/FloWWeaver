@@ -3,9 +3,10 @@ package video_streaming
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go_video_streamer/internal/opencv_global_capture"
 	"gocv.io/x/gocv"
-	"log"
+	"log/slog"
 )
 
 type CaptureContext struct {
@@ -28,7 +29,7 @@ func LaunchStreamDaemon(ctx *CaptureContext) {
 		case <-ctx.Done():
 			err := (*ctx.Streamer.capture).Close()
 			if err != nil {
-				log.Printf("Error closing capture Streamer: %v", err)
+				slog.Error(fmt.Sprintf("Error closing capture Streamer: %v", err))
 			}
 			return
 		}
@@ -37,13 +38,13 @@ func LaunchStreamDaemon(ctx *CaptureContext) {
 
 func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureContext {
 	capture, err := opencv_global_capture.NewVideoCapture(streamId)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil
+	}
 	capture.Set(gocv.VideoCaptureFPS, settings.FPS)
 	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
 	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
-	if err != nil {
-		log.Fatal(err)
-		return nil
-	}
 	ctx := CaptureContext{
 		Streamer:            NewCaptureStreamer(&capture),
 		Context:             context.Background(),
@@ -63,7 +64,7 @@ func (ctx *CaptureContext) Err() error {
 	var captureError *CaptureError
 	switch {
 	case errors.As(contextError, &captureError):
-		log.Fatal(contextError.Error())
+		slog.Error(contextError.Error())
 		return contextError
 	default:
 		return contextError

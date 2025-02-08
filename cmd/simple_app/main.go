@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"go_video_streamer/internal/video_streaming"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -35,9 +35,9 @@ func main() {
 
 		err := http.ListenAndServe(":8080", nil)
 		if errors.Is(err, http.ErrServerClosed) {
-			fmt.Printf("server closed\n")
+			slog.Info("server closed")
 		} else if err != nil {
-			fmt.Printf("error starting server: %s\n", err)
+			slog.Error("error starting server: %s", err)
 			os.Exit(1)
 		}
 	}
