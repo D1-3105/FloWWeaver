@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package InputStreamShard;
 
-option optimize_for = LITE_RUNTIME;
-option go_package = "./;InputStreamShard";
+option go_package = "go_video_streamer/internal/InputStreamShard;InputStreamShard";
 
 message StreamShard {
   bytes image_data=1;

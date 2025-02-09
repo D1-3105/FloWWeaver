@@ -55,6 +55,20 @@ func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureCon
 	return &ctx
 }
 
+func CaptureContextFromCapture(capture opencv_global_capture.VideoCapture, settings CaptureParams, name string) *CaptureContext {
+	capture.Set(gocv.VideoCaptureFPS, settings.FPS)
+	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
+	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
+	ctx := CaptureContext{
+		Streamer:            NewCaptureStreamer(&capture),
+		Context:             context.Background(),
+		streamerInitialized: make(chan bool),
+	}
+	ctx.Value(name)
+	go LaunchStreamDaemon(&ctx)
+	return &ctx
+}
+
 func (ctx *CaptureContext) Done() <-chan struct{} {
 	return ctx.Context.Done()
 }
