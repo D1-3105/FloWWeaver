@@ -128,6 +128,11 @@ func (manager *HLSDirManager) AddBatch(_ context.Context, batch []gocv.Mat) erro
 	defer func(writer *gocv.VideoWriter) {
 		_ = writer.Close()
 	}(writer)
+	defer func() {
+		for _, im := range batch {
+			_ = im.Close()
+		}
+	}()
 	for _, im := range batch {
 		err := writer.Write(im)
 		if err != nil {
