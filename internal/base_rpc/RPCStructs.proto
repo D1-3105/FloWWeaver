@@ -1,0 +1,15 @@
+syntax = "proto3";
+package base_rpc;
+option go_package = "go_video_streamer/internal/base_rpc;base_rpc";
+
+message NewStream {
+  string name = 1;
+  float fps = 2;
+  uint32 width = 3;
+  uint32 height = 4;
+  uint32 streamType = 5;
+}
+
+message RemoveStream {
+  string name = 1;
+}

@@ -8,6 +8,7 @@ package grpc_consumer
 
 import (
 	context "context"
+	base_rpc "go_video_streamer/internal/base_rpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,8 +30,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VideoRCVClient interface {
 	StreamFrames(ctx context.Context, in *NamedFrame, opts ...grpc.CallOption) (*VideoStreamResponse, error)
-	AddStream(ctx context.Context, in *NewStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error)
-	RMStream(ctx context.Context, in *RemoveStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error)
+	AddStream(ctx context.Context, in *base_rpc.NewStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error)
+	RMStream(ctx context.Context, in *base_rpc.RemoveStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error)
 }
 
 type videoRCVClient struct {
@@ -51,7 +52,7 @@ func (c *videoRCVClient) StreamFrames(ctx context.Context, in *NamedFrame, opts 
 	return out, nil
 }
 
-func (c *videoRCVClient) AddStream(ctx context.Context, in *NewStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error) {
+func (c *videoRCVClient) AddStream(ctx context.Context, in *base_rpc.NewStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EditStreamOperationResponse)
 	err := c.cc.Invoke(ctx, VideoRCV_AddStream_FullMethodName, in, out, cOpts...)
@@ -61,7 +62,7 @@ func (c *videoRCVClient) AddStream(ctx context.Context, in *NewStream, opts ...g
 	return out, nil
 }
 
-func (c *videoRCVClient) RMStream(ctx context.Context, in *RemoveStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error) {
+func (c *videoRCVClient) RMStream(ctx context.Context, in *base_rpc.RemoveStream, opts ...grpc.CallOption) (*EditStreamOperationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EditStreamOperationResponse)
 	err := c.cc.Invoke(ctx, VideoRCV_RMStream_FullMethodName, in, out, cOpts...)
@@ -76,8 +77,8 @@ func (c *videoRCVClient) RMStream(ctx context.Context, in *RemoveStream, opts ..
 // for forward compatibility.
 type VideoRCVServer interface {
 	StreamFrames(context.Context, *NamedFrame) (*VideoStreamResponse, error)
-	AddStream(context.Context, *NewStream) (*EditStreamOperationResponse, error)
-	RMStream(context.Context, *RemoveStream) (*EditStreamOperationResponse, error)
+	AddStream(context.Context, *base_rpc.NewStream) (*EditStreamOperationResponse, error)
+	RMStream(context.Context, *base_rpc.RemoveStream) (*EditStreamOperationResponse, error)
 	mustEmbedUnimplementedVideoRCVServer()
 }
 
@@ -91,10 +92,10 @@ type UnimplementedVideoRCVServer struct{}
 func (UnimplementedVideoRCVServer) StreamFrames(context.Context, *NamedFrame) (*VideoStreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StreamFrames not implemented")
 }
-func (UnimplementedVideoRCVServer) AddStream(context.Context, *NewStream) (*EditStreamOperationResponse, error) {
+func (UnimplementedVideoRCVServer) AddStream(context.Context, *base_rpc.NewStream) (*EditStreamOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddStream not implemented")
 }
-func (UnimplementedVideoRCVServer) RMStream(context.Context, *RemoveStream) (*EditStreamOperationResponse, error) {
+func (UnimplementedVideoRCVServer) RMStream(context.Context, *base_rpc.RemoveStream) (*EditStreamOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RMStream not implemented")
 }
 func (UnimplementedVideoRCVServer) mustEmbedUnimplementedVideoRCVServer() {}
@@ -137,7 +138,7 @@ func _VideoRCV_StreamFrames_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _VideoRCV_AddStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewStream)
+	in := new(base_rpc.NewStream)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -149,13 +150,13 @@ func _VideoRCV_AddStream_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: VideoRCV_AddStream_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoRCVServer).AddStream(ctx, req.(*NewStream))
+		return srv.(VideoRCVServer).AddStream(ctx, req.(*base_rpc.NewStream))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _VideoRCV_RMStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveStream)
+	in := new(base_rpc.RemoveStream)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -167,7 +168,7 @@ func _VideoRCV_RMStream_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: VideoRCV_RMStream_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoRCVServer).RMStream(ctx, req.(*RemoveStream))
+		return srv.(VideoRCVServer).RMStream(ctx, req.(*base_rpc.RemoveStream))
 	}
 	return interceptor(ctx, in, info, handler)
 }

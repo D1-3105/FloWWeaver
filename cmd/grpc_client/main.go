@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"go_video_streamer/api/grpc_consumer"
 	"go_video_streamer/internal/InputStreamShard"
-	"go_video_streamer/internal/grpc_consumer"
+	"go_video_streamer/internal/base_rpc"
 	"go_video_streamer/internal/video_streaming"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -34,7 +35,7 @@ func main() {
 	captureContext := video_streaming.NewCaptureContext(0, capParams)
 	stream, err := client.AddStream(
 		context.Background(),
-		&grpc_consumer.NewStream{
+		&base_rpc.NewStream{
 			Fps:        float32(capParams.FPS),
 			Width:      uint32(capParams.Width),
 			Height:     uint32(capParams.Height),

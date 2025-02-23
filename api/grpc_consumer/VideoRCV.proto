@@ -1,0 +1,27 @@
+syntax = "proto3";
+package grpc_consumer;
+
+import "InputStreamShard.proto";
+import "RPCStructs.proto";
+
+option go_package = "go_video_streamer/api/grpc_consumer;grpc_consumer";
+
+service VideoRCV {
+  rpc StreamFrames(NamedFrame) returns (VideoStreamResponse);
+  rpc AddStream(base_rpc.NewStream) returns (EditStreamOperationResponse);
+  rpc RMStream(base_rpc.RemoveStream) returns (EditStreamOperationResponse);
+}
+
+message NamedFrame {
+  string stream = 1;
+  InputStreamShard.StreamShard shard = 2;
+}
+
+message EditStreamOperationResponse {
+  int32 status = 1;
+  string message = 2;
+}
+
+message VideoStreamResponse {
+  uint32 status = 1;
+}

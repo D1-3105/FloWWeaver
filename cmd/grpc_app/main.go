@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go_video_streamer/internal/grpc_consumer"
+	"go_video_streamer/api/grpc_consumer"
 	"google.golang.org/grpc"
 	"log/slog"
 	"net"
