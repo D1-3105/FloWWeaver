@@ -13,3 +13,12 @@ message NewStream {
 message RemoveStream {
   string name = 1;
 }
+
+message DeletionCause {
+    uint64 target_frames = 1;
+}
+
+message DelayedRemoveStream {
+  string name = 1;
+  DeletionCause cause = 2;
+}

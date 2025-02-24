@@ -9,6 +9,7 @@ import (
 
 type HLS interface {
 	HandleFrame(context.Context, gocv.Mat)
+	Dump()
 }
 
 type Config struct {

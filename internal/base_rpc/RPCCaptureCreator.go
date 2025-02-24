@@ -6,5 +6,5 @@ import (
 )
 
 type CaptureCreator interface {
-	NewCapture(ch chan *InputStreamShard.StreamShard) (opencv_global_capture.VideoCapture, error)
+	NewCapture(chan *InputStreamShard.StreamShard, *NewStream) (opencv_global_capture.VideoCapture, error)
 }

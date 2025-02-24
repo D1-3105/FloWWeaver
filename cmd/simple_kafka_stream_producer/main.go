@@ -57,7 +57,7 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Printf("Sending message with size %d to rabbitmq", len(msg))
+		log.Printf("Sending message with size %d to kafka", len(msg))
 		kafkaMessage := kafka.Message{Key: []byte(kafkaK), Value: msg}
 		go func() {
 			err := producer.WriteMessages(context.Background(), kafkaMessage)

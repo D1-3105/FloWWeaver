@@ -1,5 +1,10 @@
 package base_rpc
 
+type StreamSchedulerService interface {
+	ScheduleDeletion(streamName string, cause *DeletionCause) error
+	PerformCheckAndDelete(streamName string) error
+}
+
 type DeletedStreamsService interface {
 	RemoveFromList(streamName string)
 	IsDeleted(streamName string) bool
@@ -18,6 +23,7 @@ type StreamManager interface {
 	) (*StreamQ, error)
 
 	RemoveChannel(name string)
+	ScheduleDeletion(name string, dc *DeletionCause) error
 
 	GetChannelMapping() ChannelMappingService
 	GetManuallyRemoved() DeletedStreamsService

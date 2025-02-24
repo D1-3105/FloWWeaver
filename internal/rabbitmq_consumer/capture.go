@@ -1,6 +1,7 @@
 package rabbitmq_consumer
 
 import (
+	"errors"
 	InputStreamShard2 "go_video_streamer/internal/InputStreamShard"
 	"gocv.io/x/gocv"
 )
@@ -9,6 +10,8 @@ type RabbitMQCapture struct {
 	props            map[gocv.VideoCaptureProperties]float64
 	consumingChannel chan *InputStreamShard2.StreamShard
 	consumer         *RMQVideoConsumer
+	closed           bool
+	closedChan       chan bool
 }
 
 func NewRabbitMQCapture(config *Config) (*RabbitMQCapture, error) {
@@ -33,11 +36,28 @@ func (rc *RabbitMQCapture) Get(vcp gocv.VideoCaptureProperties) float64 {
 	return value
 }
 
+func (rc *RabbitMQCapture) IsOpened() bool {
+	return !rc.closed
+}
+
 func (rc *RabbitMQCapture) Read(mat *gocv.Mat) bool {
-	return InputStreamShard2.ToMatrix(&rc.consumer.reportChan, mat)
+	if rc.closed {
+		return false
+	}
+	select {
+	case <-rc.closedChan:
+		return false
+	case shard := <-rc.consumingChannel:
+		return InputStreamShard2.ToMatrix(shard, mat)
+	}
 }
 
 func (rc *RabbitMQCapture) Close() error {
+	if rc.closed {
+		return errors.New("rmq_consumer already closed")
+	}
+	rc.closed = true
+	rc.closedChan <- true
 	rc.consumer.Stop()
 	close(rc.consumingChannel)
 	return nil

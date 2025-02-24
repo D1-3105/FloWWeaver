@@ -36,8 +36,7 @@ func (consumer *RMQVideoConsumer) Start() {
 	go func() {
 		handler := func(consumerContext stream.ConsumerContext, message *amqp.Message) {
 			var streamShard InputStreamShard2.StreamShard
-			err := proto.Unmarshal(message.GetData(), &streamShard)
-			if err != nil {
+			if err := proto.Unmarshal(message.GetData(), &streamShard); err != nil {
 				slog.Error(fmt.Sprintf("Error unmarshalling input stream shard data: %v", err))
 				return
 			}

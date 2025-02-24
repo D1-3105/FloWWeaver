@@ -9,8 +9,8 @@ import (
 	"log/slog"
 )
 
-func ToMatrix(consChan *chan *StreamShard, mat *gocv.Mat) bool {
-	matData := <-(*consChan)
+func ToMatrix(shard *StreamShard, mat *gocv.Mat) bool {
+	matData := shard
 	var newMat gocv.Mat
 	var err error
 

@@ -7,4 +7,5 @@ type VideoCapture interface {
 	Set(properties gocv.VideoCaptureProperties, val float64)
 	Get(properties gocv.VideoCaptureProperties) float64
 	Close() error
+	IsOpened() bool
 }

@@ -12,6 +12,7 @@ import (
 type StreamerManagerService struct {
 	ChannelMapping   ChannelMappingService
 	ManuallyRemoved  DeletedStreamsService
+	StreamScheduler  StreamSchedulerService
 	EditStreamsMutex sync.Locker
 	CapCreator       CaptureCreator
 }
@@ -25,9 +26,12 @@ func (scs *StreamerManagerService) GetChannelMapping() ChannelMappingService {
 }
 
 func NewLocalMemStreamerConsumingService(creator CaptureCreator) StreamManager {
+	chanMapping := NewChannelMappingMap()
+	scheduler := NewLocalStreamScheduler(chanMapping)
 	return &StreamerManagerService{
-		ChannelMapping:   NewChannelMappingMap(),
+		ChannelMapping:   chanMapping,
 		ManuallyRemoved:  NewLocalRemovedStreamsService(),
+		StreamScheduler:  scheduler,
 		EditStreamsMutex: &sync.Mutex{},
 		CapCreator:       creator,
 	}
@@ -36,8 +40,6 @@ func NewLocalMemStreamerConsumingService(creator CaptureCreator) StreamManager {
 func (scs *StreamerManagerService) AddChannelMapping(
 	name string, ignoreFailover bool, streamParams *NewStream,
 ) (*StreamQ, error) {
-	scs.EditStreamsMutex.Lock()
-	defer scs.EditStreamsMutex.Unlock()
 	if scs.ManuallyRemoved.IsDeleted(name) {
 		if ignoreFailover {
 			scs.ManuallyRemoved.RemoveFromList(name)
@@ -46,7 +48,7 @@ func (scs *StreamerManagerService) AddChannelMapping(
 		}
 	}
 	channel := make(chan *InputStreamShard.StreamShard, 50)
-	capture, err := scs.CapCreator.NewCapture(channel)
+	capture, err := scs.CapCreator.NewCapture(channel, streamParams)
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +68,9 @@ func (scs *StreamerManagerService) AddChannelMapping(
 
 	switch streamParams.StreamType {
 	case 0:
-		go video_streaming.ListenStreamToHLS(streamWrapper.CaptureContext, name)
+		go video_streaming.ListenStreamToHLSWithCallback(
+			streamWrapper.CaptureContext, name, scs.StreamScheduler.PerformCheckAndDelete,
+		)
 		break
 
 	default:
@@ -78,8 +82,6 @@ func (scs *StreamerManagerService) AddChannelMapping(
 }
 
 func (scs *StreamerManagerService) RemoveChannel(name string) {
-	scs.EditStreamsMutex.Lock()
-	defer scs.EditStreamsMutex.Unlock()
 	stream, ok := scs.ChannelMapping.GetStream(name)
 	if !ok {
 		return
@@ -90,4 +92,9 @@ func (scs *StreamerManagerService) RemoveChannel(name string) {
 	if !scs.ManuallyRemoved.IsDeleted(name) {
 		scs.ManuallyRemoved.AddDeletedStream(name)
 	}
+}
+
+func (scs *StreamerManagerService) ScheduleDeletion(name string, dc *DeletionCause) error {
+	err := scs.StreamScheduler.ScheduleDeletion(name, dc)
+	return err
 }

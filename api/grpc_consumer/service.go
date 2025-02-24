@@ -7,7 +7,6 @@ import (
 	"go_video_streamer/internal/InputStreamShard"
 	baserpc "go_video_streamer/internal/base_rpc"
 	"go_video_streamer/internal/opencv_global_capture"
-	"gocv.io/x/gocv"
 	"log/slog"
 )
 
@@ -20,13 +19,12 @@ type GRPCCaptureCreator struct {
 	Server *GRPCVideoRCVServer
 }
 
-func (cc *GRPCCaptureCreator) NewCapture(ch chan *InputStreamShard.StreamShard) (
+func (cc *GRPCCaptureCreator) NewCapture(ch chan *InputStreamShard.StreamShard, _ *baserpc.NewStream) (
 	opencv_global_capture.VideoCapture, error) {
-	return &GRPCCapture{
+	return NewGRPCCapture(
 		&ConsumerConfig{grpcServer: cc.Server},
 		ch,
-		make(map[gocv.VideoCaptureProperties]float64),
-	}, nil
+	)
 }
 
 func NewGRPCVideoRCVServer() *GRPCVideoRCVServer {

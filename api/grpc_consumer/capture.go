@@ -10,10 +10,20 @@ type GRPCCapture struct {
 	config        *ConsumerConfig
 	listenChannel chan *InputStreamShard.StreamShard
 	props         map[gocv.VideoCaptureProperties]float64
+	closed        bool
+	closedChan    chan bool
 }
 
 func (c *GRPCCapture) Read(mat *gocv.Mat) bool {
-	return InputStreamShard.ToMatrix(&c.listenChannel, mat)
+	if c.closed {
+		return false
+	}
+	select {
+	case <-c.closedChan:
+		return false
+	case shard := <-c.listenChannel:
+		return InputStreamShard.ToMatrix(shard, mat)
+	}
 }
 
 func (c *GRPCCapture) Set(vcp gocv.VideoCaptureProperties, value float64) {
@@ -30,6 +40,8 @@ func (c *GRPCCapture) Get(vcp gocv.VideoCaptureProperties) float64 {
 
 func (c *GRPCCapture) Close() error {
 	c.config.grpcServer.RemoveChannel(c.config.name)
+	c.closed = true
+	c.closedChan <- true
 	return nil
 }
 
@@ -38,5 +50,11 @@ func NewGRPCCapture(config *ConsumerConfig, listenChannel chan *InputStreamShard
 		config:        config,
 		listenChannel: listenChannel,
 		props:         make(map[gocv.VideoCaptureProperties]float64),
+		closed:        false,
+		closedChan:    make(chan bool),
 	}, nil
+}
+
+func (c *GRPCCapture) IsOpened() bool {
+	return !c.closed
 }

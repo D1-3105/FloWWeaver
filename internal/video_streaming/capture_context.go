@@ -23,13 +23,14 @@ type CaptureParams struct {
 }
 
 func LaunchStreamDaemon(ctx *CaptureContext) {
-
 	for {
 		select {
 		case <-ctx.Done():
-			err := (*ctx.Streamer.capture).Close()
+			err := ctx.Streamer.capture.Close()
 			if err != nil {
-				slog.Error(fmt.Sprintf("Error closing capture Streamer: %v", err))
+				slog.Error(fmt.Sprintf(
+					"Error closing capture Streamer inside of LaunchStreamDaemon: %v", err,
+				))
 			}
 			return
 		}
@@ -46,7 +47,7 @@ func NewCaptureContext(streamId interface{}, settings CaptureParams) *CaptureCon
 	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
 	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
 	ctx := CaptureContext{
-		Streamer:            NewCaptureStreamer(&capture),
+		Streamer:            NewCaptureStreamer(capture),
 		Context:             context.Background(),
 		streamerInitialized: make(chan bool),
 	}
@@ -60,7 +61,7 @@ func CaptureContextFromCapture(capture opencv_global_capture.VideoCapture, setti
 	capture.Set(gocv.VideoCaptureFrameWidth, float64(settings.Width))
 	capture.Set(gocv.VideoCaptureFrameHeight, float64(settings.Height))
 	ctx := CaptureContext{
-		Streamer:            NewCaptureStreamer(&capture),
+		Streamer:            NewCaptureStreamer(capture),
 		Context:             context.Background(),
 		streamerInitialized: make(chan bool),
 	}

@@ -1,6 +1,7 @@
 package kafka_consumer
 
 import (
+	"errors"
 	"github.com/segmentio/kafka-go"
 	InputStreamShard2 "go_video_streamer/internal/InputStreamShard"
 	"gocv.io/x/gocv"
@@ -8,8 +9,10 @@ import (
 
 type KafkaCapture struct {
 	kafkaConfig   *kafka.ReaderConfig
-	kafkaConsumer *KafkaVideoConsumer
+	KafkaConsumer *KafkaVideoConsumer
 	props         map[gocv.VideoCaptureProperties]float64
+	closed        bool
+	closedChan    chan bool
 }
 
 func NewKafkaCapture(kafkaConfig *kafka.ReaderConfig) *KafkaCapture {
@@ -17,13 +20,23 @@ func NewKafkaCapture(kafkaConfig *kafka.ReaderConfig) *KafkaCapture {
 	go kafkaConsumer.Start()
 	return &KafkaCapture{
 		kafkaConfig:   kafkaConfig,
-		kafkaConsumer: kafkaConsumer,
+		KafkaConsumer: kafkaConsumer,
 		props:         make(map[gocv.VideoCaptureProperties]float64),
+		closed:        false,
+		closedChan:    make(chan bool, 10),
 	}
 }
 
 func (k *KafkaCapture) Read(mat *gocv.Mat) bool {
-	return InputStreamShard2.ToMatrix(&k.kafkaConsumer.reportChan, mat)
+	if k.closed {
+		return false
+	}
+	select {
+	case <-k.closedChan:
+		return false
+	case shard := <-k.KafkaConsumer.ReportChan:
+		return InputStreamShard2.ToMatrix(shard, mat)
+	}
 }
 
 func (k *KafkaCapture) Set(vcp gocv.VideoCaptureProperties, value float64) {
@@ -39,7 +52,16 @@ func (k *KafkaCapture) Get(vcp gocv.VideoCaptureProperties) float64 {
 }
 
 func (k *KafkaCapture) Close() error {
-	k.kafkaConsumer.Stop()
-	close(k.kafkaConsumer.reportChan)
+	if k.closed {
+		return errors.New("kafka_consumer already closed")
+	}
+	k.KafkaConsumer.Stop()
+	k.closed = true
+	k.closedChan <- true
+	close(k.KafkaConsumer.ReportChan)
 	return nil
+}
+
+func (k *KafkaCapture) IsOpened() bool {
+	return !k.closed
 }
