@@ -1,6 +1,6 @@
 # FloWWeaver
 
-## What it can do now?
+## What can it do now?
 - Stream management+frame streaming through kafka (Recommended)
 - Stream management+frame streaming through grpc (If you have no broker)
 - Frame streaming through RabbitMQ
