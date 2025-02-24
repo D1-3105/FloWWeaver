@@ -5,7 +5,7 @@
 - Stream management+frame streaming through grpc (If you have no broker)
 - Frame streaming through RabbitMQ
 - GRPC based ComfyUI node (needs update of proto compilation)
-- Transfer different stream protocols into HLS (checkout `./html` fo JavaScript)
+- Transfer different stream protocols into HLS (checkout `./html` for JavaScript)
 
 ## TODO:
 - RabbitMQ stream manager
