@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go_video_streamer/internal/hls"
+	"gocv.io/x/gocv"
 	"log/slog"
 )
 
@@ -25,6 +26,7 @@ func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 	}()
 	defer cancel()
 
+	isStreamInput := int(streamer.capture.Get(gocv.VideoCaptureFrameCount)) <= 0
 	for {
 		if !(streamer.capture.IsOpened()) {
 			slog.Info("Stream %s is not opened", streamName)
@@ -33,10 +35,17 @@ func ListenStreamToHLS(ctx *CaptureContext, streamName string) {
 
 		frame, err := streamer.GetFrame()
 		if err != nil || frame.Empty() {
-			slog.Error("Get frame error", err)
+			if err != nil {
+				slog.Error(fmt.Sprintf("Get frame error: %s", err.Error()))
+
+			} else {
+				slog.Info(fmt.Sprintf("Get frame error - captured empty frame: %s", streamName))
+			}
+			if !isStreamInput {
+				break
+			}
 			continue
 		}
-
 		hlsHandler.HandleFrame(ctx.Context, frame)
 	}
 }

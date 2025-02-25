@@ -3,10 +3,15 @@ package file_server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 )
+
+func BuildHLSPlaylistURL(streamName string) string {
+	return fmt.Sprintf("/hls/%s/index.m3u8", streamName)
+}
 
 func LaunchStreamRepoFileServer(_ context.Context) {
 	http.HandleFunc("/hls/", func(w http.ResponseWriter, r *http.Request) {

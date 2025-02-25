@@ -1,0 +1,8 @@
+syntax = "proto3";
+package client_stream_creator;
+option go_package = "go_video_streamer/api/client_stream_creator;client_stream_creator";
+
+message ClientNewStreamRequest {
+  string url = 1;
+  uint32 streamT = 2;
+}

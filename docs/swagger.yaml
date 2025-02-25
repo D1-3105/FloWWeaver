@@ -1,0 +1,73 @@
+basePath: /api/v1
+definitions:
+  client_stream_creator.ClientNewStreamRequest:
+    properties:
+      streamT:
+        type: integer
+      url:
+        type: string
+    type: object
+  client_stream_creator.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  client_stream_creator.PresignedURLResponse:
+    properties:
+      presigned_url:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API for video streaming service
+  title: Video Streamer API
+  version: "1.0"
+paths:
+  /restream/:
+    get:
+      description: Processes the presigned URL and starts the stream
+      parameters:
+      - description: Encrypted stream configuration
+        in: query
+        name: signature
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/client_stream_creator.ErrorResponse'
+      summary: Process stream
+      tags:
+      - Stream
+  /restream/presigned/:
+    post:
+      consumes:
+      - application/json
+      description: Generates an encrypted presigned URL for creating a new stream
+      parameters:
+      - description: Stream configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client_stream_creator.ClientNewStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client_stream_creator.PresignedURLResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/client_stream_creator.ErrorResponse'
+      summary: Generate presigned URL
+      tags:
+      - Stream
+swagger: "2.0"

@@ -1,0 +1,113 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for video streaming service",
+        "title": "Video Streamer API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/restream/": {
+            "get": {
+                "description": "Processes the presigned URL and starts the stream",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stream"
+                ],
+                "summary": "Process stream",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Encrypted stream configuration",
+                        "name": "signature",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/client_stream_creator.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/restream/presigned/": {
+            "post": {
+                "description": "Generates an encrypted presigned URL for creating a new stream",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Stream"
+                ],
+                "summary": "Generate presigned URL",
+                "parameters": [
+                    {
+                        "description": "Stream configuration",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client_stream_creator.ClientNewStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client_stream_creator.PresignedURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/client_stream_creator.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "client_stream_creator.ClientNewStreamRequest": {
+            "type": "object",
+            "properties": {
+                "streamT": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "client_stream_creator.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "client_stream_creator.PresignedURLResponse": {
+            "type": "object",
+            "properties": {
+                "presigned_url": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
