@@ -14,7 +14,7 @@ type StreamQ struct {
 
 type LocalChannelMappingService struct {
 	ChannelMapping map[string]*StreamQ
-	mu             sync.Locker
+	Mu             sync.Locker
 }
 
 func (c *LocalChannelMappingService) GetStream(s string) (*StreamQ, bool) {
@@ -23,20 +23,20 @@ func (c *LocalChannelMappingService) GetStream(s string) (*StreamQ, bool) {
 }
 
 func (c *LocalChannelMappingService) SetStream(name string, stream *StreamQ) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
 	c.ChannelMapping[name] = stream
 }
 
 func (c *LocalChannelMappingService) DeleteStream(name string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
 	delete(c.ChannelMapping, name)
 }
 
 func NewChannelMappingMap() ChannelMappingService {
 	return &LocalChannelMappingService{
 		ChannelMapping: make(map[string]*StreamQ),
-		mu:             &sync.Mutex{},
+		Mu:             &sync.Mutex{},
 	}
 }

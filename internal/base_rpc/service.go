@@ -37,6 +37,17 @@ func NewLocalMemStreamerConsumingService(creator CaptureCreator) StreamManager {
 	}
 }
 
+func NewLocalMemStreamerConsumingServiceCustomizable(creator CaptureCreator, chanMapping ChannelMappingService) StreamManager {
+	scheduler := NewLocalStreamScheduler(chanMapping)
+	return &StreamerManagerService{
+		ChannelMapping:   chanMapping,
+		ManuallyRemoved:  NewLocalRemovedStreamsService(),
+		StreamScheduler:  scheduler,
+		EditStreamsMutex: &sync.Mutex{},
+		CapCreator:       creator,
+	}
+}
+
 func (scs *StreamerManagerService) AddChannelMapping(
 	name string, ignoreFailover bool, streamParams *NewStream,
 ) (*StreamQ, error) {

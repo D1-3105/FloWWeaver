@@ -15,6 +15,8 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"sync/atomic"
+	"time"
 )
 
 func main() {
@@ -34,6 +36,10 @@ func main() {
 	conn, err := kafka.DialLeader(
 		context.Background(), "tcp", brokersList[0], topic, 0,
 	)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Error during connection to leader: %s", err))
+		panic(err)
+	}
 	err = conn.CreateTopics(
 		kafka.TopicConfig{Topic: topic, NumPartitions: 1, ReplicationFactor: 1},
 		kafka.TopicConfig{Topic: "0", NumPartitions: 1, ReplicationFactor: 1},
@@ -92,11 +98,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	deleteStreamDelayed := base_rpc.DelayedRemoveStream{
+		Name:  newStream.Name,
+		Cause: &base_rpc.DeletionCause{TargetFrames: 141},
+	}
 	go func() {
-		deleteStreamDelayed := base_rpc.DelayedRemoveStream{
-			Name:  newStream.Name,
-			Cause: &base_rpc.DeletionCause{TargetFrames: 141},
-		}
 		serialized, err = proto.Marshal(&deleteStreamDelayed)
 		if err != nil {
 			panic(err)
@@ -119,7 +125,9 @@ func main() {
 	}()
 
 	go video_streaming.LaunchStreamDaemon(captureContext)
-	for {
+	sent := atomic.Uint64{}
+	sent.Store(0)
+	for range deleteStreamDelayed.Cause.TargetFrames {
 		var streamShard InputStreamShard.StreamShard
 		img, err := captureContext.Streamer.GetFrame()
 		if err != nil {
@@ -153,6 +161,7 @@ func main() {
 		kafkaMessage := kafka.Message{Key: []byte(fmt.Sprintf("%f", capParams.FPS)), Value: msg}
 		go func() {
 			err := producerStream.WriteMessages(context.Background(), kafkaMessage)
+			sent.Add(1)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -161,5 +170,13 @@ func main() {
 				log.Fatal(errClose)
 			}
 		}()
+	}
+	for {
+		now := sent.Load()
+		if now == deleteStreamDelayed.Cause.TargetFrames {
+			break
+		}
+		slog.Info(fmt.Sprintf("Sent %d of %d", now, deleteStreamDelayed.Cause.TargetFrames))
+		time.Sleep(2)
 	}
 }

@@ -59,7 +59,10 @@ func NewKafkaVideoRCV(kafkaReaderConfig *kafka.ReaderConfig) *KafkaVideoRCV {
 		kafkaReaderConfig: kafkaReaderConfig,
 		KafkaReader:       kafkaReader,
 	}
-	manager := baserpc.NewLocalMemStreamerConsumingService(&KafkaCaptureCreator{Server: &rcvServer})
+	manager := baserpc.NewLocalMemStreamerConsumingServiceCustomizable(
+		&KafkaCaptureCreator{Server: &rcvServer},
+		NewKafkaChannelMappingService(kafkaReaderConfig.Brokers[0]),
+	)
 	rcvServer.StreamManager = manager
 	return &rcvServer
 }
