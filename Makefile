@@ -24,7 +24,7 @@ build_gocv_base_image:
 	cd "$$GOCV_HOME" && \
 	docker build -f Dockerfile -t flowweaver:gocv-base .
 
-build_flowweaver_grpc:
+build_flowweaver_grpc: build_gocv_base_image
 	docker build -f Dockerfile.grpc_local_mem -t flowweaver:grpc_local_mem .
 
 registry_login:
