@@ -13,6 +13,8 @@ jobs:
 
     - name: Docker login
       run: make registry_login
+      env:
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Build grpc
       run: make build_flowweaver_grpc
