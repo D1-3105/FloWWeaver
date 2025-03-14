@@ -5,7 +5,7 @@ CURRENT_APP_VERSION := $(shell \
                 --always \
 )
 
-REGISTRY_USER := D1-3105
+REGISTRY_USER := d13105
 REGISTRY_PASSWORD ?=
 
 compile_grpc:
