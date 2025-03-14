@@ -37,4 +37,4 @@ push_flowweaver_grpc:
 swagger_http_rest_api:
 	swag init -g cmd/http_rest_api/main.go -o ./docs
 
-.PHONY: build_gocv_base_image compile_grpc
+.PHONY: build_gocv_base_image compile_grpc build_flowweaver_grpc push_flowweaver_grpc registry_login
