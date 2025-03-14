@@ -1,4 +1,4 @@
-name: Makefile CI
+name: build and push grpc
 
 on:
   workflow_dispatch:
